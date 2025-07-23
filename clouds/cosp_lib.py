@@ -14,13 +14,13 @@ from datetime import datetime, timedelta
 def cal_gbl_mean (ds, var):
     weights = np.cos(np.deg2rad(ds['lat']))
     weights.name = "weights"
-    gbl_mean_var = ds[var].weighted(weights).mean(dim=['lat', 'lon'])
+    gbl_mean_var = ds[var].weighted(weights).mean(dim=['lat', 'lon'],skipna=True)
     return  gbl_mean_var
 
 def monthly_mean (ds, var):
     weights = np.cos(np.deg2rad(ds['lat']))
     weights.name = "weights"
-    monthly_clim = ds[var].weighted(weights).mean(dim=['lat', 'lon']).groupby('time.month').mean(dim='time')
+    monthly_clim = ds[var].weighted(weights).mean(dim=['lat', 'lon'],skipna=True).groupby('time.month').mean(dim='time',skipna=True)
     return  monthly_clim
     
 # author: Huan.Guo@noaa.gov
