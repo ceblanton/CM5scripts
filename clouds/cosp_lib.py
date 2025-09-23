@@ -12,16 +12,27 @@ from datetime import datetime, timedelta
 # author: Huan.Guo@noaa.gov
 # compute global-mean 
 def cal_gbl_mean (ds, var):
-    weights = np.cos(np.deg2rad(ds['lat']))
-    weights.name = "weights"
-    gbl_mean_var = ds[var].weighted(weights).mean(dim=['lat', 'lon'],skipna=True)
-    return  gbl_mean_var
+   # Create latitude weights
+    lat_weights = np.cos(np.deg2rad(ds['lat']))
+    lat_weights.name = "weights"
+
+    # Expand lat_weights to 2D (lat, lon) by broadcasting
+    weights_2d = xr.broadcast(lat_weights, ds['lon'])[0]
+
+    # Apply weights and compute mean
+    gbl_mean_var = ds[var].weighted(weights_2d).mean(dim=['lat', 'lon'], skipna=True)
+
+    return gbl_mean_var
 
 def monthly_mean (ds, var):
     weights = np.cos(np.deg2rad(ds['lat']))
     weights.name = "weights"
     monthly_clim = ds[var].weighted(weights).mean(dim=['lat', 'lon'],skipna=True).groupby('time.month').mean(dim='time',skipna=True)
     return  monthly_clim
+
+def zonal_mean (ds, var):
+    zonal_clim = ds[var].mean(dim=['lon'],skipna=True).mean(dim='time',skipna=True)
+    return  zonal_clim
     
 # author: Huan.Guo@noaa.gov
 # compute bias between models and observations.
